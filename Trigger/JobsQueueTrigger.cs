@@ -1,10 +1,8 @@
-using System;
 using Azure.Storage.Queues.Models;
 using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using static ServerSideProgramming.Trigger.GetWeatherHttpTrigger;
 
 namespace ServerSideProgramming.Trigger
 {

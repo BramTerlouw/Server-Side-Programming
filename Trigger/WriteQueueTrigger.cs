@@ -1,4 +1,3 @@
-using System;
 using Azure.Storage.Queues.Models;
 using JobQueueTrigger.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
