@@ -15,31 +15,34 @@ namespace ServerSideProgramming.Trigger
         }
 
         [Function("GetWeatherHttpTrigger")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public CustomOutputType Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
 
             // Creates a job and puts it into queue
-            // ...
+            string jobId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
 
-            // Returns a jobid ??
-            // ...
-
-
+            // Create custom response
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-            response.WriteString("Welcome to Azure Functions!");
 
-            return response;
+            // Returns a job url
+            string id = $"{jobId}";
+            return new CustomOutputType
+            {
+                JobId = id,
+                HttpResponse = response
+            };
         }
 
         public class CustomOutputType
         {
             [QueueOutput("jobs")]
             public string? JobId { get; set; }
+            public HttpResponseData? HttpResponse { get; set; }
         }
     }
 }

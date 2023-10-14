@@ -30,8 +30,9 @@ namespace ServerSideProgramming.Trigger
             _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
 
             // Get Job ID from QueueMessage
-            // ...
+            string jobId = message.Body.ToString();
 
+            // Get measurements and image for next job
             StationMeasurement[] measurements = await _weatherService.GetWeather();
             string image = await _fetchImageService.FetchImageAsync();
 
@@ -41,7 +42,7 @@ namespace ServerSideProgramming.Trigger
             {
                 new CustomOutputType
                 {
-                    JobId = "1",
+                    JobId = jobId,
                     Image = image,
                     Measurement = measurements[i]
                 };
