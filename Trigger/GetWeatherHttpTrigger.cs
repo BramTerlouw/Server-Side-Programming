@@ -14,8 +14,21 @@ namespace ServerSideProgramming.Trigger
             _logger = loggerFactory.CreateLogger<GetWeatherHttpTrigger>();
         }
 
+
+        /// <summary>
+        /// Method Run is a Azure HTTP trigger which functions like an endpoint. This method initializes
+        /// a new job by creating a job id and adding it to the queue.
+        /// </summary>
+        /// 
+        /// <param name="req">
+        /// Req is a HTTP GET request.
+        /// </param>
+        /// 
+        /// <returns>
+        /// Returns CustomOutputType obj as response, containing the job ID and HTTP response.
+        /// </returns>
         [Function("GetWeatherHttpTrigger")]
-        public CustomOutputType Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public CustomOutputType Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             string jobId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();

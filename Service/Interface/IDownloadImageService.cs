@@ -4,6 +4,6 @@ namespace ServerSideProgramming.Service.Interface
 {
     public interface IDownloadImageService
     {
-        Bitmap getImageFromUrl(string url);
+        byte[] getImageFromUrl(string url);
     }
 }

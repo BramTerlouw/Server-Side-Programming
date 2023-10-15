@@ -14,6 +14,19 @@ namespace ServerSideProgramming.Trigger
             _logger = loggerFactory.CreateLogger<FetchWeatherHttpTrigger>();
         }
 
+
+        /// <summary>
+        /// Method Run is a Azure HTTP trigger which functions like an endpoint. This method lists if
+        /// the job is busy or all generated images with weather data.
+        /// </summary>
+        /// 
+        /// <param name="req">
+        /// Req is a HTTP GET request.
+        /// </param>
+        /// 
+        /// <returns>
+        /// ...
+        /// </returns>
         [Function("FetchWeatherHttpTrigger")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
         {

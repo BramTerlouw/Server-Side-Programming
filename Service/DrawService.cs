@@ -1,4 +1,5 @@
-﻿using JobQueueTrigger.Model;
+﻿using ImageMagick;
+using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
@@ -15,25 +16,27 @@ namespace JobQueueTrigger.Service
             _logger = logger;
         }
 
-        public void getWeatherImage(string jsonImage, StationMeasurement measurement)
+        public byte[] DrawImage(byte[] byteArr, StationMeasurement measurement)
         {
-            Bitmap bitMapImage = new(jsonImage);
+            using MemoryStream stream   = new MemoryStream(byteArr);
+            using MagickImage image     = new MagickImage(stream);
 
-            Graphics Gimg = Graphics.FromImage(bitMapImage);
-            Font imgFont = new Font("Arial", 12);
+            image.Settings.FillColor        = MagickColors.Black;
+            image.Settings.BorderColor      = MagickColors.Black;
+            image.Settings.FontWeight       = FontWeight.Bold;
+            image.Settings.FontPointsize    = 12;
 
-            PointF pointLineOne = new PointF(5, 5);
-            PointF pointLineTwo = new PointF(5, 20);
-            PointF pointLineThree = new PointF(5, 35);
+            DrawableText stationName    = new DrawableText(50, 100, $"Station: {measurement.stationname}");
+            DrawableText temperature    = new DrawableText(50, 130, $"Regio: {measurement.temperature}");
+            DrawableText windDir        = new DrawableText(50, 160, $"WindDirection: {measurement.winddirection}");
+            DrawableText windSpeed      = new DrawableText(50, 190, $"Windspeed: {measurement.windspeed}");
 
-            Color color = Color.White;
-            SolidBrush bForeColor = new SolidBrush(color);
+            image.Draw(stationName);
+            image.Draw(temperature);
+            image.Draw(windDir);
+            image.Draw(windSpeed);
 
-            Gimg.DrawString($"", imgFont, bForeColor, pointLineOne);
-            Gimg.DrawString($"", imgFont, bForeColor, pointLineTwo);
-            Gimg.DrawString($"", imgFont, bForeColor, pointLineThree);
-
-            bitMapImage.Save("imagePath", ImageFormat.Jpeg);
+            return image.ToByteArray();
         }
     }
 }

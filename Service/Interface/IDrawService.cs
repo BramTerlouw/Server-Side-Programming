@@ -4,6 +4,6 @@ namespace JobQueueTrigger.Service.Interface
 {
     public interface IDrawService
     {
-        void getWeatherImage(string jsonImage, StationMeasurement measurement);
+        byte[] DrawImage(byte[] byteArr, StationMeasurement measurement);
     }
 }

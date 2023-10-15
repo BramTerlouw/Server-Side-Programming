@@ -15,50 +15,51 @@ namespace ServerSideProgramming.Trigger
     {
         private readonly ILogger<JobsQueueTrigger> _logger;
         private readonly IWeatherService _weatherService;
-        private readonly IFetchImageService _fetchImageService;
-        private readonly IDownloadImageService _downloadImageService;
 
         public JobsQueueTrigger(
             ILogger<JobsQueueTrigger> logger,
-            IWeatherService weatherService,
-            IFetchImageService fetchImageService,
-            IDownloadImageService downloadImageService)
+            IWeatherService weatherService)
         {
             _logger                 = logger;
             _weatherService         = weatherService;
-            _fetchImageService      = fetchImageService;
-            _downloadImageService   = downloadImageService;
         }
 
+
+        /// <summary>
+        /// Method RunAsync is a Azure Queue trigger which triggers on the "jobs" queue. The method fetches
+        /// weather station information from an api, loops through it and add a measurement with the 
+        /// job id to the writing queue.
+        /// </summary>
+        /// 
+        /// <param name="message">
+        /// Message contains a Job ID.
+        /// </param>
         [Function(nameof(JobsQueueTrigger))]
         public async Task RunAsync([QueueTrigger("jobs", Connection = "jobs-conn")] QueueMessage message)
         {
             _logger.LogInformation($"C# Queue trigger function processed Job with ID: {message.MessageText}");
             QueueClient queueClient = InitializeQueueClient();
 
+
             string jobId = message.Body.ToString();
             StationMeasurement[] measurements = await _weatherService.GetWeather();
-            //string imageUrl = await _fetchImageService.FetchUrl();
-            //Image image = _downloadImageService.getImageFromUrl(imageUrl);
 
-            for (int i = 0; i < 2; i++)
+
+            for (int i = 0; i < measurements.Length; i++)
             {
-                Job data = new Job(jobId, "image", measurements[i]);
+                Job data = new Job(jobId, measurements[i]);
                 await queueClient.SendMessageAsync(
                     Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(
-                            JsonConvert.SerializeObject(data)
-                        )
-                    )
-                );
+                            JsonConvert.SerializeObject(data))));
             }
         }
 
         private QueueClient InitializeQueueClient()
         {
-            var connectionString = "UseDevelopmentStorage=true";
-            var queueServiceClient = new QueueServiceClient(connectionString);
-            var queueClient = queueServiceClient.GetQueueClient("writes");
+            var connectionString    = "UseDevelopmentStorage=true";
+            var queueServiceClient  = new QueueServiceClient(connectionString);
+            var queueClient         = queueServiceClient.GetQueueClient("writes");
 
             if (!queueClient.Exists())
             {

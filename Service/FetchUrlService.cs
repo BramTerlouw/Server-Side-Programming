@@ -21,19 +21,18 @@ namespace JobQueueTrigger.Service
                     if (response.IsSuccessStatusCode)
                     {
                         string jsonContent = await response.Content.ReadAsStringAsync();
-                        url = getTargetUrl(jsonContent);
+                        return url = getTargetUrl(jsonContent);
                     }
                     else
                     {
-                        Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}");
+                        throw new Exception();
                     }
                 }
                 catch (HttpRequestException e)
                 {
-                    Console.WriteLine($"HTTP request error: {e.Message}");
+                    throw e;
                 }
             }
-            return url;
         }
 
         private string getTargetUrl(string jsonContent)

@@ -4,43 +4,59 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServerSideProgramming.Model;
+using ServerSideProgramming.Service;
+using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
 {
     public class WriteQueueTrigger
     {
         private readonly ILogger<WriteQueueTrigger> _logger;
+        private readonly IFetchImageService _fetchImageService;
+        private readonly IDownloadImageService _downloadImageService;
         private readonly IDrawService _drawService;
         private readonly IBlobService _blobService;
 
         public WriteQueueTrigger(
             ILogger<WriteQueueTrigger> logger,
+            IFetchImageService fetchImageService,
+            IDownloadImageService downloadImageService,
             IDrawService drawService,
             IBlobService blobService)
         {
-            _logger         = logger;
-            _drawService    = drawService;
-            _blobService    = blobService;
+            _logger                 = logger;
+            _fetchImageService      = fetchImageService;
+            _downloadImageService   = downloadImageService;
+            _drawService            = drawService;
+            _blobService            = blobService;
         }
 
+
+        /// <summary>
+        /// Method RunAsync is a Azure Queue trigger which triggers on the "writes" queue. The method fectches
+        /// a url for an image, downloads it and draws stationmeasurements on it. It is then stored in blob.
+        /// </summary>
+        /// 
+        /// <param name="message">
+        /// Message contains a serialized StationMeasurement object.
+        /// </param>
         [Function(nameof(WriteQueueTrigger))]
         public async Task RunAsync([QueueTrigger("writes", Connection = "writes-conn")] QueueMessage message)
         {
             _logger.LogInformation($"C# Queue trigger function processed: ");
-
             Job? data = JsonConvert.DeserializeObject<Job>(message.Body.ToString());
 
-            // Draw measurement on the image
-            //_drawService.getWeatherImage(Image, measurement);
+
+            string imageUrl = await _fetchImageService.FetchUrl();
+            byte[] byteArr = _downloadImageService.getImageFromUrl(imageUrl);
 
 
-            // Confert image to blob
-            string blob = JsonConvert.SerializeObject(data);
-
-
-            // Add to blob with id
-            await _blobService.InitBlobAsync("test");
-            await _blobService.CreateBlob(blob);
+            byte[] writtenImage = _drawService.DrawImage(byteArr, data.Measurement);
+            
+            
+            //string blob = JsonConvert.SerializeObject(data);
+            //await _blobService.InitBlobAsync("test");
+            //await _blobService.CreateBlob(blob);
         }
     }
 }

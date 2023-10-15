@@ -47,23 +47,28 @@ namespace JobQueueTrigger.Service
         {
             if (obj["actual"] == null)
             {
-                Console.WriteLine("Actual weather information not found");
+                throw new Exception("Actual information not found");
             }
-            return (JObject?)obj["actual"];
+            return obj["actual"] as JObject;
         }
 
         private JArray getStationArray(JObject obj)
         {
-            if (obj["stationmeasurements"] == null)
+            if (obj["stationmeasurements"] != null)
             {
-                Console.WriteLine("StationMeasurements not found!");
+                throw new Exception("Station measurements not found");
             }
-            return (JArray?)obj["stationmeasurements"];
+            return obj["stationmeasurements"] as JArray;
         }
 
         private StationMeasurement[] transformToObjArr(JArray jsonArr)
         {
-            return jsonArr.ToObject<StationMeasurement[]>();
+            StationMeasurement[]? arr = jsonArr.ToObject<StationMeasurement[]>();
+            if (arr == null)
+            {
+                throw new Exception();
+            }
+            return arr;
         }
     }
 }
