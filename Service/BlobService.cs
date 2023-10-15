@@ -7,33 +7,35 @@ namespace JobQueueTrigger.Service
 {
     public class BlobService : IBlobService
     {
-        private readonly BlobServiceClient blobServiceClient;
-        private readonly BlobContainerClient containerClient;
-        private readonly BlobClient blobClient;
+        private readonly BlobServiceClient _blobServiceClient;
+        private BlobContainerClient _containerClient;
+        private BlobClient _blobClient;
 
         public BlobService()
         {
-            blobServiceClient = new BlobServiceClient("");
-            containerClient = blobServiceClient.GetBlobContainerClient("");
-            blobClient = containerClient.GetBlobClient("");
-
+            _blobServiceClient  = new BlobServiceClient("UseDevelopmentStorage=true");
+            _containerClient    = _blobServiceClient.GetBlobContainerClient("images");
         }
+
+        public async Task InitBlobAsync(string blob)
+        {
+            _blobClient = _containerClient.GetBlobClient(blob);
+        }
+
         public async Task CreateBlob(string blob)
         {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(blob)))
             {
-                await blobClient.UploadAsync(stream, true);
-                Console.WriteLine("Blob created with new content.");
+                await _blobClient.UploadAsync(stream, true);
             }
         }
 
-        public async Task GetBlobs()
+        public async Task GetBlob()
         {
-            BlobDownloadInfo blobDownloadInfo = await blobClient.DownloadAsync();
+            BlobDownloadInfo blobDownloadInfo = await _blobClient.DownloadAsync();
             using (var streamReader = new StreamReader(blobDownloadInfo.Content))
             {
                 string content = await streamReader.ReadToEndAsync();
-                Console.WriteLine($"Blob Content: {content}");
             }
         }
     }

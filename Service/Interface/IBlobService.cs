@@ -2,7 +2,8 @@
 {
     public interface IBlobService
     {
-        Task GetBlobs();
+        Task InitBlobAsync(string blob);
+        Task GetBlob();
         Task CreateBlob(string blob);
     }
 }

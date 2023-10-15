@@ -18,18 +18,13 @@ namespace ServerSideProgramming.Trigger
         public CustomOutputType Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-
-
-            // Creates a job and puts it into queue
             string jobId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
 
-            // Create custom response
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
 
-            // Returns a job url
             string id = $"{jobId}";
             return new CustomOutputType
             {

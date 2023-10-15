@@ -8,7 +8,7 @@ namespace JobQueueTrigger.Service
     {
         public async Task<StationMeasurement[]> GetWeather()
         {
-            StationMeasurement[] arr = null;
+            StationMeasurement[]? arr = null;
             string url = "https://data.buienradar.nl/2.0/feed/json";
 
             using (HttpClient httpClient = new HttpClient())
