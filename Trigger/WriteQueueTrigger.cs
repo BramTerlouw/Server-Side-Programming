@@ -46,16 +46,21 @@ namespace ServerSideProgramming.Trigger
             _logger.LogInformation($"C# Queue trigger function processed: ");
             Job? data = JsonConvert.DeserializeObject<Job>(message.Body.ToString());
 
+            if (data == null || data.JobId == null || data.Measurement == null)
+            {
+                return;
+            }
 
-            string imageUrl = await _fetchImageService.FetchUrl();
-            byte[] byteArr = _downloadImageService.getImageFromUrl(imageUrl);
+
+            //string imageUrl = await _fetchImageService.FetchUrl();
+            //byte[] byteArr = _downloadImageService.getImageFromUrl(imageUrl);
 
 
-            byte[] writtenImage = _drawService.DrawImage(byteArr, data.Measurement);
-            
-            
+            //byte[] writtenImage = _drawService.DrawImage(byteArr, data.Measurement);
+
+
             //string blob = JsonConvert.SerializeObject(data);
-            //await _blobService.InitBlobAsync("test");
+            //await _blobService.InitBlobAsync(data.JobId);
             //await _blobService.CreateBlob(blob);
         }
     }

@@ -6,7 +6,6 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServerSideProgramming.Model;
-using ServerSideProgramming.Service.Interface;
 using System.Text;
 
 namespace ServerSideProgramming.Trigger

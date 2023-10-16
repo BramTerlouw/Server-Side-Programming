@@ -8,7 +8,6 @@ namespace JobQueueTrigger.Service
     {
         public async Task<StationMeasurement[]> GetWeather()
         {
-            StationMeasurement[]? arr = null;
             string url = "https://data.buienradar.nl/2.0/feed/json";
 
             using (HttpClient httpClient = new HttpClient())
@@ -20,45 +19,34 @@ namespace JobQueueTrigger.Service
                     if (response.IsSuccessStatusCode)
                     {
                         string jsonContent = await response.Content.ReadAsStringAsync();
-                        arr = getTargetArray(jsonContent);
+                        return getTargetArray(jsonContent);
                     }
                     else
                     {
-                        Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}");
+                        throw new Exception("Downloading weather data did not succeed!");
                     }
                 }
                 catch (HttpRequestException e)
                 {
-                    Console.WriteLine($"HTTP request error: {e.Message}");
+                    throw e;
                 }
             }
-            return arr;
         }
 
         private StationMeasurement[] getTargetArray(string json)
         {
             JObject jsonObject = JObject.Parse(json);
-            JObject subObj = getActualObject(jsonObject);
-            JArray jArr = getStationArray(subObj);
+            JArray jArr = getActualObject(jsonObject);
             return transformToObjArr(jArr);
         }
 
-        private JObject getActualObject(JObject obj)
+        private JArray getActualObject(JObject obj)
         {
-            if (obj["actual"] == null)
+            if (obj["actual"]["stationmeasurements"] == null)
             {
-                throw new Exception("Actual information not found");
+                throw new Exception("Data not found!");
             }
-            return obj["actual"] as JObject;
-        }
-
-        private JArray getStationArray(JObject obj)
-        {
-            if (obj["stationmeasurements"] != null)
-            {
-                throw new Exception("Station measurements not found");
-            }
-            return obj["stationmeasurements"] as JArray;
+            return obj["actual"]["stationmeasurements"] as JArray;
         }
 
         private StationMeasurement[] transformToObjArr(JArray jsonArr)
@@ -66,7 +54,7 @@ namespace JobQueueTrigger.Service
             StationMeasurement[]? arr = jsonArr.ToObject<StationMeasurement[]>();
             if (arr == null)
             {
-                throw new Exception();
+                throw new Exception("Something went wrong during conversion!");
             }
             return arr;
         }

@@ -2,8 +2,6 @@
 using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
 using Microsoft.Extensions.Logging;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace JobQueueTrigger.Service
 {
