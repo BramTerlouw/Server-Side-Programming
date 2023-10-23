@@ -1,17 +1,21 @@
 using System.Net;
+using JobQueueTrigger.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace ServerSideProgramming.Trigger
 {
     public class FetchWeatherHttpTrigger
     {
         private readonly ILogger _logger;
+        private readonly IBlobService _blobService;
 
-        public FetchWeatherHttpTrigger(ILoggerFactory loggerFactory)
+        public FetchWeatherHttpTrigger(ILoggerFactory loggerFactory, IBlobService blobService)
         {
             _logger = loggerFactory.CreateLogger<FetchWeatherHttpTrigger>();
+            _blobService = blobService;
         }
 
 
@@ -28,10 +32,12 @@ namespace ServerSideProgramming.Trigger
         /// ...
         /// </returns>
         [Function("FetchWeatherHttpTrigger")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
+            await _blobService.InitBlobAsync("test");
+            List<string> urls = await _blobService.GetBlobs();
 
             // Get status of job or list of images with weather data
             // ...
@@ -42,9 +48,10 @@ namespace ServerSideProgramming.Trigger
 
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
-            response.WriteString("Welcome to Azure Functions!");
+            string serializedUrls = JsonConvert.SerializeObject(urls);
+            response.WriteString(serializedUrls);
 
             return response;
         }

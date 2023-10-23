@@ -14,29 +14,32 @@ namespace JobQueueTrigger.Service
         public BlobService()
         {
             _blobServiceClient  = new BlobServiceClient("UseDevelopmentStorage=true");
-            _containerClient    = _blobServiceClient.GetBlobContainerClient("images");
         }
 
-        public async Task InitBlobAsync(string blob)
+        public async Task InitBlobAsync(string jobId)
         {
-            _blobClient = _containerClient.GetBlobClient(blob);
+            _containerClient = _blobServiceClient.GetBlobContainerClient(jobId);
+            await _containerClient.CreateIfNotExistsAsync();
         }
 
-        public async Task CreateBlob(string blob)
+        public async Task CreateBlob(string blobName, byte[] blob)
         {
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(blob)))
+            _blobClient = _containerClient.GetBlobClient(blobName);
+
+            using (var stream = new MemoryStream(blob))
             {
                 await _blobClient.UploadAsync(stream, true);
             }
         }
 
-        public async Task GetBlob()
+        public async Task<List<string>> GetBlobs()
         {
-            BlobDownloadInfo blobDownloadInfo = await _blobClient.DownloadAsync();
-            using (var streamReader = new StreamReader(blobDownloadInfo.Content))
+            List<string> urls = new List<string>();
+            await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
             {
-                string content = await streamReader.ReadToEndAsync();
+                urls.Add(_containerClient.GetBlobClient(blobItem.Name).Uri.ToString());
             }
+            return urls;
         }
     }
 }
