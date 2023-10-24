@@ -1,19 +1,11 @@
 ﻿using ImageMagick;
 using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
-using Microsoft.Extensions.Logging;
 
 namespace JobQueueTrigger.Service
 {
     public class DrawService : IDrawService
     {
-        private readonly ILogger<DrawService> _logger;
-
-        public DrawService(ILogger<DrawService> logger)
-        {
-            _logger = logger;
-        }
-
         public byte[] DrawImage(byte[] byteArr, StationMeasurement measurement)
         {
             using MemoryStream stream   = new MemoryStream(byteArr);

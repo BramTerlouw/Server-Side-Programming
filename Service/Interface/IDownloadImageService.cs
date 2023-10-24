@@ -1,9 +1,7 @@
-﻿using System.Drawing;
-
-namespace ServerSideProgramming.Service.Interface
+﻿namespace ServerSideProgramming.Service.Interface
 {
     public interface IDownloadImageService
     {
-        byte[] getImageFromUrl(string url);
+        Task<byte[]> GetImage();
     }
 }

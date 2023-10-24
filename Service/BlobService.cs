@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using JobQueueTrigger.Service.Interface;
-using System.Text;
 
 namespace JobQueueTrigger.Service
 {
@@ -20,6 +19,7 @@ namespace JobQueueTrigger.Service
         {
             _containerClient = _blobServiceClient.GetBlobContainerClient(jobId);
             await _containerClient.CreateIfNotExistsAsync();
+            _containerClient.SetAccessPolicy(PublicAccessType.Blob);
         }
 
         public async Task CreateBlob(string blobName, byte[] blob)

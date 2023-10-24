@@ -4,7 +4,6 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServerSideProgramming.Model;
-using ServerSideProgramming.Service;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
@@ -12,20 +11,17 @@ namespace ServerSideProgramming.Trigger
     public class WriteQueueTrigger
     {
         private readonly ILogger<WriteQueueTrigger> _logger;
-        private readonly IFetchImageService _fetchImageService;
         private readonly IDownloadImageService _downloadImageService;
         private readonly IDrawService _drawService;
         private readonly IBlobService _blobService;
 
         public WriteQueueTrigger(
             ILogger<WriteQueueTrigger> logger,
-            IFetchImageService fetchImageService,
             IDownloadImageService downloadImageService,
             IDrawService drawService,
             IBlobService blobService)
         {
             _logger                 = logger;
-            _fetchImageService      = fetchImageService;
             _downloadImageService   = downloadImageService;
             _drawService            = drawService;
             _blobService            = blobService;
@@ -33,8 +29,8 @@ namespace ServerSideProgramming.Trigger
 
 
         /// <summary>
-        /// Method RunAsync is a Azure Queue trigger which triggers on the "writes" queue. The method fectches
-        /// a url for an image, downloads it and draws stationmeasurements on it. It is then stored in blob.
+        /// Method RunAsync is a Azure Queue trigger which triggers on the "writes" queue. The method downloads
+        /// an iamge and draws stationmeasurements on it. It is then stored in blob.
         /// </summary>
         /// 
         /// <param name="message">
@@ -55,14 +51,13 @@ namespace ServerSideProgramming.Trigger
                 return;
             }
 
-
-            string imageUrl = await _fetchImageService.FetchUrl();
-            byte[] byteArr = _downloadImageService.getImageFromUrl(imageUrl);
+            byte[] byteArr = await _downloadImageService.GetImage();
             byte[] writtenImage = _drawService.DrawImage(byteArr, data.Measurement);
 
 
             await _blobService.InitBlobAsync(data.JobId);
             await _blobService.CreateBlob($"{data.JobId}_{data.Measurement.stationname.Replace(" ", "_")}", writtenImage);
+            Thread.Sleep(1000);
         }
     }
 }

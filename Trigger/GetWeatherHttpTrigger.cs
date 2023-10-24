@@ -35,6 +35,7 @@ namespace ServerSideProgramming.Trigger
 
 
             var response = req.CreateResponse(HttpStatusCode.OK);
+            response.WriteString($"http://localhost:7253/api/FetchWeatherHttpTrigger?jobId={jobId}");
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
 

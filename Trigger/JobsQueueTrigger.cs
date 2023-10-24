@@ -1,4 +1,3 @@
-using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
@@ -6,6 +5,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServerSideProgramming.Model;
+using ServerSideProgramming.Service.Interface;
 using System.Text;
 
 namespace ServerSideProgramming.Trigger
@@ -14,13 +14,16 @@ namespace ServerSideProgramming.Trigger
     {
         private readonly ILogger<JobsQueueTrigger> _logger;
         private readonly IWeatherService _weatherService;
+        private readonly IQueueService _queueService;
 
         public JobsQueueTrigger(
             ILogger<JobsQueueTrigger> logger,
-            IWeatherService weatherService)
+            IWeatherService weatherService,
+            IQueueService queueService)
         {
             _logger                 = logger;
             _weatherService         = weatherService;
+            _queueService           = queueService;
         }
 
 
@@ -37,7 +40,7 @@ namespace ServerSideProgramming.Trigger
         public async Task RunAsync([QueueTrigger("jobs", Connection = "jobs-conn")] QueueMessage message)
         {
             _logger.LogInformation($"C# Queue trigger function processed Job with ID: {message.MessageText}");
-            QueueClient queueClient = InitializeQueueClient();
+            _queueService.InitQueue("writes");
 
 
             string jobId = message.Body.ToString();
@@ -47,24 +50,11 @@ namespace ServerSideProgramming.Trigger
             for (int i = 0; i < measurements.Length; i++)
             {
                 Job data = new Job(jobId, measurements[i]);
-                await queueClient.SendMessageAsync(
+                await _queueService.SendMessageAsync(
                     Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(
                             JsonConvert.SerializeObject(data))));
             }
-        }
-
-        private QueueClient InitializeQueueClient()
-        {
-            var connectionString    = "UseDevelopmentStorage=true";
-            var queueServiceClient  = new QueueServiceClient(connectionString);
-            var queueClient         = queueServiceClient.GetQueueClient("writes");
-
-            if (!queueClient.Exists())
-            {
-                queueClient.Create();
-            }
-            return queueClient;
         }
     }
 }

@@ -1,17 +1,28 @@
 ﻿using ServerSideProgramming.Service.Interface;
-using System.Drawing;
-using System.Net;
 
 namespace ServerSideProgramming.Service
 {
     public class DownloadImageService : IDownloadImageService
     {
-        public byte[] getImageFromUrl(string url)
+        public async Task<byte[]> GetImage()
         {
-            byte[] dataArr;
-            using (WebClient webClient = new WebClient())
+            using var httpClient = new HttpClient();
+            try
             {
-                return dataArr = webClient.DownloadData(url);
+                HttpResponseMessage response = await httpClient.GetAsync("https://picsum.photos/500");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+                else
+                {
+                    throw new Exception("Something went wrong during the process of getting the image!");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
