@@ -1,10 +1,10 @@
 $prefix              = 'INH-'+ (Get-Random -Minimum 1000 -Maximum 9999)
-$resource_group_name = "$prefix-WRKSHP-D-AZWE-RG-1"
+$resource_group_name = "$prefix-ServerSideProgramming-BramTerlouw" # -> Own resource group name
 $template            = "./function.bicep"
 
 $parameters = @{
     prefix      = $prefix
-    serviceTag  = "WRKSHP"
+    serviceTag  = "ServerSideProgramming"
     environment = "D"
     regionTag   = "AZWE"
 }

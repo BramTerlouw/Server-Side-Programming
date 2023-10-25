@@ -16,7 +16,7 @@ var storageAccountName = replace(toLower('${resourcePrefix}-SA-1'), '-', '')
 var functionAppName = '${resourcePrefix}-FA-1'
 var serverFarmName = '${resourcePrefix}-ASP-1'
 
-// Storage account
+// Storage account (General purpose storage service, contains queue, blob etc!)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   kind: 'StorageV2'
@@ -28,23 +28,28 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   }
   properties: {
     supportsHttpsTrafficOnly: true
-    allowBlobPublicAccess: false
+    allowBlobPublicAccess: true // -> Because our images are in the blob
     minimumTlsVersion: 'TLS1_2'
   }
 }
 
-// App insights
+// Queue Jobs
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  kind: 'web'
-  location: location
-  tags: tags
-  name: appInsightsName
-  properties: {
-    Application_Type: 'web'
-    Flow_Type: 'Bluefield'
-    Request_Source: 'rest'
-    RetentionInDays: appInsightsRetention
+resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-10-01' = {
+    name: 'jobs'
+    // parent: resourceSymbolicName -> In the same parent resource!
+    properties: {
+        metadata: {} // -> Don't have any meta data to show for.
+  }
+}
+
+// Queue Writes
+
+resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-10-01' = {
+    name: 'writes'
+    // parent: resourceSymbolicName -> In the same parent resource!
+    properties: {
+        metadata: {} // -> Don't have any meta data to show for.
   }
 }
 
@@ -61,7 +66,7 @@ resource serverFarm 'Microsoft.Web/serverfarms@2021-03-01' = {
   properties: {}
 }
 
-// Function app
+// Function app (Serverless application for an app with Azure Functions)
 
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
@@ -102,19 +107,42 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     redundancyMode: 'None'
   }
 
+  // Function Config (Configuration for my Function App)
+  // Publish my project to this Function App, Set Connection strings to AzureWebJobsStorage
+  // to use the resources defined in this template!
+
   resource functionAppConfig 'config@2021-03-01' = {
     name: 'appsettings'
     properties: {
       // function app settings
+      // !! Configures Storage Connection String for Azure Functions (CONN for Queue) !!
       'AzureWebJobsStorage': 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccount.name), '2021-08-01').keys[0].value};EndpointSuffix=core.windows.net'
       'FUNCTIONS_EXTENSION_VERSION': '~4'
       'FUNCTIONS_WORKER_RUNTIME': 'dotnet'
+      // !! Configures Connection String for Azure Files, which can be shared between functions !!
       'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING': 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(resourceId('Microsoft.Storage/storageAccounts', storageAccount.name), '2019-04-01').keys[0].value};EndpointSuffix=core.windows.net'
       'WEBSITE_CONTENTSHARE': replace(toLower(functionApp.name), '-', '')
+      
       // ai settings
+      // !! Configures Application Insights Instrumentation Key !!
       'APPINSIGHTS_INSTRUMENTATIONKEY': reference('Microsoft.Insights/components/${appInsights.name}', '2015-05-01').InstrumentationKey
       'ApplicationInsightsAgent_EXTENSION_VERSION': '~2'
       'InstrumentationEngine_EXTENSION_VERSION': '~1'
     }
   }
+
+// App insights (Used for monitoring the function app)
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  kind: 'web'
+  location: location
+  tags: tags
+  name: appInsightsName
+  properties: {
+    Application_Type: 'web'
+    Flow_Type: 'Bluefield'
+    Request_Source: 'rest'
+    RetentionInDays: appInsightsRetention
+  }
+}
 }
