@@ -57,7 +57,6 @@ namespace ServerSideProgramming.Trigger
 
             await _blobService.InitBlobAsync(data.JobId);
             await _blobService.CreateBlob($"{data.JobId}_{data.Measurement.stationname.Replace(" ", "_")}", writtenImage);
-            Thread.Sleep(1000);
         }
     }
 }
