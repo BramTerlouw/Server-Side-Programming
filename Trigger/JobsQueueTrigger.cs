@@ -47,19 +47,19 @@ namespace ServerSideProgramming.Trigger
             StationMeasurement[] measurements = await _weatherService.GetWeather();
 
 
-            //for (int i = 0; i < measurements.Length; i++)
-            //{
-            //    Job data = new Job(jobId, measurements[i]);
-            //    await _queueService.SendMessageAsync(
-            //        Convert.ToBase64String(
-            //            Encoding.UTF8.GetBytes(
-            //                JsonConvert.SerializeObject(data))));
-            //}
-            Job data = new Job(jobId, measurements[0]);
-            await _queueService.SendMessageAsync(
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(
-                        JsonConvert.SerializeObject(data))));
+            for (int i = 0; i < measurements.Length; i++)
+            {
+                Job data = new Job(jobId, measurements[i]);
+                await _queueService.SendMessageAsync(
+                    Convert.ToBase64String(
+                        Encoding.UTF8.GetBytes(
+                            JsonConvert.SerializeObject(data))));
+            }
+            //Job data = new Job(jobId, measurements[0]);
+            //await _queueService.SendMessageAsync(
+            //    Convert.ToBase64String(
+            //        Encoding.UTF8.GetBytes(
+            //            JsonConvert.SerializeObject(data))));
         }
     }
 }

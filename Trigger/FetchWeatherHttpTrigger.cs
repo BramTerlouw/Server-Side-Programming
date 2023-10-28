@@ -47,7 +47,7 @@ namespace ServerSideProgramming.Trigger
 
             if (req.Query == null || req.Query["jobId"] == null)
             {
-                HttpResponseData errorResponse = CreateResponse(req, "No or incorrect query parameter 'jobId' provided!");
+                HttpResponseData errorResponse = CreateResponse(req, "No or incorrect query parameter 'jobId' provided!", HttpStatusCode.BadRequest);
                 return errorResponse;
             }
             string jobId = req.Query["jobId"]?.ToString();
@@ -55,7 +55,7 @@ namespace ServerSideProgramming.Trigger
             _queueService.InitQueue("writes");
             if (await _queueService.MessagesStillInQueue(jobId))
             {
-                HttpResponseData infoResponse = CreateResponse(req, "Images are still being processed!");
+                HttpResponseData infoResponse = CreateResponse(req, "Images are still being processed!", HttpStatusCode.OK);
                 return infoResponse;
             }
             
@@ -64,13 +64,13 @@ namespace ServerSideProgramming.Trigger
             List<string> urls = await _blobService.GetBlobs();
 
             string serializedUrls = JsonConvert.SerializeObject(urls);
-            HttpResponseData response = CreateResponse(req, serializedUrls);
+            HttpResponseData response = CreateResponse(req, serializedUrls, HttpStatusCode.OK);
             return response;
         }
 
-        private HttpResponseData CreateResponse(HttpRequestData req, string message)
+        private HttpResponseData CreateResponse(HttpRequestData req, string message, HttpStatusCode code)
         {
-            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            var response = req.CreateResponse(code);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
             response.WriteString(message);
             return response;

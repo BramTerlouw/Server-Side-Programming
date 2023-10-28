@@ -21,7 +21,7 @@ namespace JobQueueTrigger.Service
             //StorageSharedKeyCredential storageSharedKeyCredential = new(accountName, accountKey);
             //_blobServiceClient = new BlobServiceClient(new Uri("..."), storageSharedKeyCredential);
             
-            _blobServiceClient  = new BlobServiceClient("AzureWebJobsStorage");
+            _blobServiceClient  = new BlobServiceClient(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
         }
 
         public async Task InitBlobAsync(string jobId)

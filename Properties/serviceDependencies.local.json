@@ -7,20 +7,23 @@
       "type": "storage.emulator",
       "connectionId": "AzureWebJobsStorage"
     },
-    "secrets1": {
-      "type": "secrets.user"
-    },
-    "storage2": {
-      "secretStore": "LocalSecretsFile",
-      "type": "storage.emulator",
-      "connectionId": "jobs-conn",
-      "dynamicId": null
-    },
     "storage3": {
       "secretStore": "LocalSecretsFile",
       "type": "storage.emulator",
       "connectionId": "writes-conn",
       "dynamicId": null
+    },
+    "storage2": {
+      "secretStore": "LocalSecretsFile",
+      "resourceId": null,
+      "type": "storage.emulator",
+      "connectionId": "jobs-conn"
+    },
+    "secrets1": {
+      "secretStore": null,
+      "resourceId": null,
+      "type": "secrets.user",
+      "connectionId": null
     }
   }
 }
