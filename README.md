@@ -1,4 +1,4 @@
-# Server Side Programmin
+# Server Side Programming
 
 **Student:**        Bram Terlouw    <br/>
 **Studentnumber:**  614992          <br/>
