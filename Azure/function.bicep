@@ -16,6 +16,9 @@ var storageAccountName = replace(toLower('${resourcePrefix}-SA-1'), '-', '')
 var functionAppName = '${resourcePrefix}-FA-1'
 var serverFarmName = '${resourcePrefix}-ASP-1'
 
+var jobQueueName = 'jobs'
+var writeQueueName = 'writes'
+
 // Storage account (General purpose storage service, contains queue, blob etc!)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
@@ -33,10 +36,25 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   }
 }
 
+// App insights
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  kind: 'web'
+  location: location
+  tags: tags
+  name: appInsightsName
+  properties: {
+    Application_Type: 'web'
+    Flow_Type: 'Bluefield'
+    Request_Source: 'rest'
+    RetentionInDays: appInsightsRetention
+  }
+}
+
 // Queue Jobs
 
-resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-10-01' = {
-    name: 'jobs'
+resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-09-01' = {
+    name: '${storageAccount.name}/default/${jobQueueName}'
     // parent: resourceSymbolicName -> In the same parent resource!
     properties: {
         metadata: {} // -> Don't have any meta data to show for.
@@ -45,8 +63,8 @@ resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-
 
 // Queue Writes
 
-resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-10-01' = {
-    name: 'writes'
+resource writesQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-09-01' = {
+    name: '${storageAccount.name}/default/${writeQueueName}'
     // parent: resourceSymbolicName -> In the same parent resource!
     properties: {
         metadata: {} // -> Don't have any meta data to show for.
@@ -130,19 +148,4 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
       'InstrumentationEngine_EXTENSION_VERSION': '~1'
     }
   }
-
-// App insights (Used for monitoring the function app)
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  kind: 'web'
-  location: location
-  tags: tags
-  name: appInsightsName
-  properties: {
-    Application_Type: 'web'
-    Flow_Type: 'Bluefield'
-    Request_Source: 'rest'
-    RetentionInDays: appInsightsRetention
-  }
-}
 }
