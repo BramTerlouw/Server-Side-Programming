@@ -1,10 +1,11 @@
 $prefix              = 'INH-'+ (Get-Random -Minimum 1000 -Maximum 9999)
-$resource_group_name = "$prefix-ServerSideProgramming-BramTerlouw" # -> Own resource group name
+#$resource_group_name = "$prefix-ServerSideProgramming-BramTerlouw" # -> Own resource group name
+$resource_group_name = "2324_614992"
 $template            = "./function.bicep"
 
 $parameters = @{
     prefix      = $prefix
-    serviceTag  = "ServerSideProgramming"
+    serviceTag  = "SSP" # Abbreviation for Server Side Programming
     environment = "D"
     regionTag   = "AZWE"
 }
@@ -14,7 +15,7 @@ $parameters = $parameters.Keys.ForEach({"$_=$($parameters[$_])"}) -join ' '
 Write-Host "Deploying resources in $resource_group_name"
 
 # Create a new resource-group
-az group create -l westeurope -n $resource_group_name
+#az group create -l westeurope -n $resource_group_name
 
 # Deploy resources inside resource-group
 $cmd = "az deployment group create --mode Incremental --resource-group $resource_group_name --template-file $template --parameters $parameters"

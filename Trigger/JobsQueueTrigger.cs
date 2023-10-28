@@ -37,7 +37,7 @@ namespace ServerSideProgramming.Trigger
         /// Message contains a Job ID.
         /// </param>
         [Function(nameof(JobsQueueTrigger))]
-        public async Task RunAsync([QueueTrigger("jobs", Connection = "jobs-conn")] QueueMessage message)
+        public async Task RunAsync([QueueTrigger("jobs", Connection = "AzureWebJobsStorage")] QueueMessage message)
         {
             _logger.LogInformation($"C# Queue trigger function processed Job with ID: {message.MessageText}");
             _queueService.InitQueue("writes");
@@ -47,14 +47,19 @@ namespace ServerSideProgramming.Trigger
             StationMeasurement[] measurements = await _weatherService.GetWeather();
 
 
-            for (int i = 0; i < measurements.Length; i++)
-            {
-                Job data = new Job(jobId, measurements[i]);
-                await _queueService.SendMessageAsync(
-                    Convert.ToBase64String(
-                        Encoding.UTF8.GetBytes(
-                            JsonConvert.SerializeObject(data))));
-            }
+            //for (int i = 0; i < measurements.Length; i++)
+            //{
+            //    Job data = new Job(jobId, measurements[i]);
+            //    await _queueService.SendMessageAsync(
+            //        Convert.ToBase64String(
+            //            Encoding.UTF8.GetBytes(
+            //                JsonConvert.SerializeObject(data))));
+            //}
+            Job data = new Job(jobId, measurements[0]);
+            await _queueService.SendMessageAsync(
+                Convert.ToBase64String(
+                    Encoding.UTF8.GetBytes(
+                        JsonConvert.SerializeObject(data))));
         }
     }
 }

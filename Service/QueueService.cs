@@ -14,7 +14,7 @@ namespace ServerSideProgramming.Service
 
         public QueueService()
         {
-            _queueServiceClient = new QueueServiceClient("UseDevelopmentStorage=true");
+            _queueServiceClient = new QueueServiceClient("AzureWebJobsStorage");
         }
 
         public void InitQueue(string queueName)
@@ -39,7 +39,7 @@ namespace ServerSideProgramming.Service
             {
                 foreach (QueueMessage item in receivedMessages)
                 {
-                    Job job = JsonConvert.DeserializeObject<Job>(item.MessageText);
+                    Job job = JsonConvert.DeserializeObject<Job>(item.Body.ToString());
                     if (job.JobId ==  jobId)
                     {
                         return true;

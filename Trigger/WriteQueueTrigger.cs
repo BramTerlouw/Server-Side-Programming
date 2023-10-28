@@ -37,7 +37,7 @@ namespace ServerSideProgramming.Trigger
         /// Message contains a serialized StationMeasurement object.
         /// </param>
         [Function(nameof(WriteQueueTrigger))]
-        public async Task RunAsync([QueueTrigger("writes", Connection = "writes-conn")] QueueMessage message)
+        public async Task RunAsync([QueueTrigger("writes", Connection = "AzureWebJobsStorage")] QueueMessage message)
         {
             _logger.LogInformation($"C# Queue trigger function processed: ");
             Job? data = JsonConvert.DeserializeObject<Job>(message.Body.ToString());

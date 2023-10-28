@@ -10,6 +10,6 @@ namespace JobQueueTrigger.Service.Interface
         Task CreateBlob(string blobName, byte[] blob);
 
         Task<UserDelegationKey> RequestUserDelegationKey();
-        Task<Uri> CreateUserDelegationSASBlob(UserDelegationKey userDelegationKey,string blobName);
+        Uri CreateUserDelegationSASBlob(UserDelegationKey userDelegationKey,BlobItem blobItem);
     }
 }

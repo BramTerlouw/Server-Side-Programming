@@ -21,7 +21,7 @@ namespace JobQueueTrigger.Service
             //StorageSharedKeyCredential storageSharedKeyCredential = new(accountName, accountKey);
             //_blobServiceClient = new BlobServiceClient(new Uri("..."), storageSharedKeyCredential);
             
-            _blobServiceClient  = new BlobServiceClient("UseDevelopmentStorage=true");
+            _blobServiceClient  = new BlobServiceClient("AzureWebJobsStorage");
         }
 
         public async Task InitBlobAsync(string jobId)
@@ -43,7 +43,7 @@ namespace JobQueueTrigger.Service
 
         public async Task<List<string>> GetBlobs()
         {
-            UserDelegationKey sasToken = await RequestUserDelegationKey();
+            //UserDelegationKey sasToken = await RequestUserDelegationKey();
             List<string> urls = new List<string>();
             
             await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
@@ -57,7 +57,7 @@ namespace JobQueueTrigger.Service
             return urls;
         }
 
-        private async Task<UserDelegationKey> RequestUserDelegationKey()
+        public async Task<UserDelegationKey> RequestUserDelegationKey()
         {
             UserDelegationKey userDelegationKey =
                 await _blobServiceClient.GetUserDelegationKeyAsync(
@@ -67,7 +67,7 @@ namespace JobQueueTrigger.Service
             return userDelegationKey;
         }
 
-        private Uri CreateUserDelegationSASBlob(
+        public Uri CreateUserDelegationSASBlob(
             UserDelegationKey userDelegationKey,
             BlobItem blobItem)
         {

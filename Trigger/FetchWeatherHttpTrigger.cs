@@ -70,7 +70,7 @@ namespace ServerSideProgramming.Trigger
 
         private HttpResponseData CreateResponse(HttpRequestData req, string message)
         {
-            var response = req.CreateResponse(HttpStatusCode.BadRequest);
+            var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
             response.WriteString(message);
             return response;
