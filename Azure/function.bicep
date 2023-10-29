@@ -55,7 +55,6 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-09-01' = {
     name: '${storageAccount.name}/default/${jobQueueName}'
-    // parent: resourceSymbolicName -> In the same parent resource!
     properties: {
         metadata: {} // -> Don't have any meta data to show for.
   }
@@ -65,7 +64,6 @@ resource jobsQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-
 
 resource writesQueue 'Microsoft.Storage/storageAccounts/queueServices/queues@2022-09-01' = {
     name: '${storageAccount.name}/default/${writeQueueName}'
-    // parent: resourceSymbolicName -> In the same parent resource!
     properties: {
         metadata: {} // -> Don't have any meta data to show for.
   }
