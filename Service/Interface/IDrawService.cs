@@ -1,4 +1,4 @@
-﻿using JobQueueTrigger.Model;
+﻿using ServerSideProgramming.Model.Entity;
 
 namespace JobQueueTrigger.Service.Interface
 {

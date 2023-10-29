@@ -1,10 +1,10 @@
 using Azure.Storage.Queues.Models;
-using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ServerSideProgramming.Model;
+using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using ServerSideProgramming.Service.Interface;
 using System.Text;
 
@@ -15,15 +15,18 @@ namespace ServerSideProgramming.Trigger
         private readonly ILogger<JobsQueueTrigger> _logger;
         private readonly IWeatherService _weatherService;
         private readonly IQueueService _queueService;
+        private readonly ITableService _tableService;
 
         public JobsQueueTrigger(
             ILogger<JobsQueueTrigger> logger,
             IWeatherService weatherService,
-            IQueueService queueService)
+            IQueueService queueService,
+            ITableService tableService)
         {
             _logger                 = logger;
             _weatherService         = weatherService;
             _queueService           = queueService;
+            _tableService           = tableService;
         }
 
 
@@ -41,9 +44,18 @@ namespace ServerSideProgramming.Trigger
         {
             _logger.LogInformation($"C# Queue trigger function processed Job with ID: {message.MessageText}");
             _queueService.InitQueue("writes");
+            _tableService.InitTable("jobstatus");
+
 
             string jobId = message.Body.ToString();
             StationMeasurement[] measurements = await _weatherService.GetWeather();
+
+
+            await _tableService.UpdateRecordInTable(
+                jobId.Split('-')[0], 
+                jobId.Split('-')[1], 
+                StatusType.Processing);
+
 
             for (int i = 0; i < measurements.Length; i++)
             {

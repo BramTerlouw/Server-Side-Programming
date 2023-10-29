@@ -3,6 +3,8 @@ using System.Text;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
@@ -43,7 +45,9 @@ namespace ServerSideProgramming.Trigger
             _queueService.InitQueue("jobs");
             _tableService.InitTable("jobstatus");
 
+
             string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
 
             if (req.Query == null || req.Query["jobName"] == null)
             {
@@ -52,19 +56,22 @@ namespace ServerSideProgramming.Trigger
                     "No or incorrect query parameter 'jobName' provided!", 
                     HttpStatusCode.BadRequest);
             }
-
             string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}";
+
+
             await _queueService.SendMessageAsync(
                 Convert.ToBase64String(
                     Encoding.UTF8.GetBytes(jobId)));
 
+
             await _tableService.CreateAsync(
-                new Model.JobStatus(
+                new JobStatus(
                     jobId.Split('-')[0], 
                     jobId.Split('-')[1], 
-                    false)
+                    (int)StatusType.Pending)
                 );
             
+
             return CreateResponse(
                 req,
                 $"Here is your personal Job ID (To be used for fetching the images) :{jobId}",

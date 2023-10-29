@@ -1,4 +1,4 @@
-﻿namespace JobQueueTrigger.Model
+﻿namespace ServerSideProgramming.Model.Entity
 {
     public class StationMeasurement
     {

@@ -1,6 +1,6 @@
 ﻿using ImageMagick;
-using JobQueueTrigger.Model;
 using JobQueueTrigger.Service.Interface;
+using ServerSideProgramming.Model.Entity;
 
 namespace JobQueueTrigger.Service
 {

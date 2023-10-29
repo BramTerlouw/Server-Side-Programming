@@ -8,8 +8,5 @@ namespace JobQueueTrigger.Service.Interface
         Task InitBlobAsync(string jobId);
         Task<List<string>> GetBlobs();
         Task CreateBlob(string blobName, byte[] blob);
-
-        Task<UserDelegationKey> RequestUserDelegationKey();
-        Uri CreateUserDelegationSASBlob(UserDelegationKey userDelegationKey,BlobItem blobItem);
     }
 }

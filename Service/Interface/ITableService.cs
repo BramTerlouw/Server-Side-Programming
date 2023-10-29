@@ -1,4 +1,5 @@
-﻿using ServerSideProgramming.Model;
+﻿using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace ServerSideProgramming.Service.Interface
     {
         void InitTable(string tableName);
         Task CreateAsync(JobStatus entity);
-        Task UpdateRecordInTable(string jobId, string jobName);
+        Task UpdateRecordInTable(string jobId, string jobName, StatusType status);
         Task<JobStatus> RetrieveRecord(string partitionKey, string rowKey);
     }
 }

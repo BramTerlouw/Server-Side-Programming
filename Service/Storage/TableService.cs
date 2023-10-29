@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
-using ServerSideProgramming.Model;
+using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Service.Storage
@@ -30,14 +31,14 @@ namespace ServerSideProgramming.Service.Storage
             await _table.ExecuteAsync(insertOperation);
         }
 
-        public async Task UpdateRecordInTable(string jobId, string jobName)
+        public async Task UpdateRecordInTable(string jobId, string jobName, StatusType status)
         {
             JobStatus jobStatusEntity = await RetrieveRecord(jobId, jobId + jobName);
             if (jobStatusEntity is not null)
             {
-                jobStatusEntity.IsCompleted = true;
+                jobStatusEntity.Status = (int)status;
                 TableOperation tableOperation = TableOperation.Replace(jobStatusEntity);
-                var result = await _table.ExecuteAsync(tableOperation);
+                await _table.ExecuteAsync(tableOperation);
             }
         }
 

@@ -4,7 +4,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ServerSideProgramming.Model;
+using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
@@ -41,27 +42,38 @@ namespace ServerSideProgramming.Trigger
         /// seen in the browser.
         /// </returns>
         [Function("FetchWeatherHttpTrigger")]
-        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             _tableService.InitTable("jobstatus");
+
 
             if (req.Query == null || req.Query["jobId"] == null)
             {
                 HttpResponseData errorResponse = CreateResponse(req, "No or incorrect query parameter 'jobId' provided!", HttpStatusCode.BadRequest);
                 return errorResponse;
             }
-            string jobId = req.Query["jobId"]?.ToString();
+            string jobId = $"{req.Query["jobId"]}";
+
 
             JobStatus jobStatus = await _tableService.RetrieveRecord(jobId.Split('-')[0], jobId.Replace("-", ""));
-            if (!jobStatus.IsCompleted)
+            if (jobStatus.Status == (int)StatusType.Pending)
             {
-                HttpResponseData infoResponse = CreateResponse(req, "Images are still being processed!", HttpStatusCode.OK);
+                HttpResponseData infoResponse = CreateResponse(req, "Job is waiting to be processed!", HttpStatusCode.OK);
                 return infoResponse;
             }
 
+
+            if (jobStatus.Status == (int)StatusType.Processing)
+            {
+                HttpResponseData infoResponse = CreateResponse(req, "Job is still being processed!", HttpStatusCode.OK);
+                return infoResponse;
+            }
+
+
             await _blobService.InitBlobAsync(jobId);
             List<string> urls = await _blobService.GetBlobs();
+
 
             string serializedUrls = JsonConvert.SerializeObject(urls);
             HttpResponseData response = CreateResponse(req, serializedUrls, HttpStatusCode.OK);

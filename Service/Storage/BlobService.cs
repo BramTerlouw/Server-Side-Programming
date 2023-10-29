@@ -1,8 +1,5 @@
-﻿using Azure.Storage;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
-using Azure.Storage.Sas;
 using JobQueueTrigger.Service.Interface;
 
 namespace ServerSideProgramming.Service.Storage
@@ -15,12 +12,6 @@ namespace ServerSideProgramming.Service.Storage
 
         public BlobService()
         {
-            // SAS TOKEN STILL IN PROGRESS
-            //string accountName = "...";
-            //string accountKey = "...";
-            //StorageSharedKeyCredential storageSharedKeyCredential = new(accountName, accountKey);
-            //_blobServiceClient = new BlobServiceClient(new Uri("..."), storageSharedKeyCredential);
-
             _blobServiceClient = new BlobServiceClient(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
         }
 
@@ -43,15 +34,10 @@ namespace ServerSideProgramming.Service.Storage
 
         public async Task<List<string>> GetBlobs()
         {
-            //UserDelegationKey sasToken = await RequestUserDelegationKey();
             List<string> urls = new List<string>();
 
             await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
             {
-                // SAS TOKEN STILL IN PROGRESS
-                //Uri uri = CreateUserDelegationSASBlob(sasToken, blobItem);
-                //urls.Add(uri.ToString());
-
                 urls.Add(_containerClient.GetBlobClient(blobItem.Name).Uri.ToString());
             }
             return urls;
@@ -65,34 +51,6 @@ namespace ServerSideProgramming.Service.Storage
                     DateTimeOffset.UtcNow.AddDays(1));
 
             return userDelegationKey;
-        }
-
-        public Uri CreateUserDelegationSASBlob(
-            UserDelegationKey userDelegationKey,
-            BlobItem blobItem)
-        {
-            Uri blobUri = _containerClient.GetBlobClient(blobItem.Name).Uri;
-
-            BlobSasBuilder sasBuilder = new BlobSasBuilder()
-            {
-                BlobContainerName = _containerClient.Name,
-                BlobName = blobItem.Name,
-                Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow,
-                ExpiresOn = DateTimeOffset.UtcNow.AddDays(1)
-            };
-
-            sasBuilder.SetPermissions(BlobSasPermissions.Read | BlobSasPermissions.Write);
-
-            BlobUriBuilder uriBuilder = new BlobUriBuilder(blobUri)
-            {
-                // Specify the user delegation key
-                Sas = sasBuilder.ToSasQueryParameters(
-                    userDelegationKey,
-                    _containerClient.GetParentBlobServiceClient().AccountName)
-            };
-
-            return uriBuilder.ToUri();
         }
     }
 }

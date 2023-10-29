@@ -11,14 +11,12 @@ namespace ServerSideProgramming.Service
             {
                 HttpResponseMessage response = await httpClient.GetAsync("https://picsum.photos/500");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadAsByteArrayAsync();
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception("Something went wrong during the process of getting the image!");
                 }
+
+                return await response.Content.ReadAsByteArrayAsync();
             }
             catch (Exception)
             {

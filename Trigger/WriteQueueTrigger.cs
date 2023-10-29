@@ -3,9 +3,9 @@ using JobQueueTrigger.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ServerSideProgramming.Model;
+using ServerSideProgramming.Model.Entity;
+using ServerSideProgramming.Model.Enumeration;
 using ServerSideProgramming.Service.Interface;
-using System.Diagnostics.Metrics;
 
 namespace ServerSideProgramming.Trigger
 {
@@ -46,6 +46,7 @@ namespace ServerSideProgramming.Trigger
             _logger.LogInformation($"C# Queue trigger function processed: ");
             Job? data = JsonConvert.DeserializeObject<Job>(message.Body.ToString());
 
+
             if (
                 data == null || 
                 data.JobId == null || 
@@ -55,6 +56,7 @@ namespace ServerSideProgramming.Trigger
                 return;
             }
 
+
             byte[] byteArr = await _downloadImageService.GetImage();
             byte[] writtenImage = _drawService.DrawImage(byteArr, data.Measurement);
 
@@ -62,10 +64,11 @@ namespace ServerSideProgramming.Trigger
             await _blobService.InitBlobAsync(data.JobId);
             await _blobService.CreateBlob($"{data.JobId}_{data.Measurement.stationname.Replace(" ", "_")}", writtenImage);
 
+
             if (data.FinalJob)
             {
                 _tableService.InitTable("jobstatus");
-                await _tableService.UpdateRecordInTable(data.JobId.Split('-')[0], data.JobId.Split('-')[1]);
+                await _tableService.UpdateRecordInTable(data.JobId.Split('-')[0], data.JobId.Split('-')[1], StatusType.Finished);
             }
         }
     }
