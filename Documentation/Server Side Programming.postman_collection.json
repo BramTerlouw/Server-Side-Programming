@@ -1,0 +1,72 @@
+{
+	"info": {
+		"_postman_id": "79522aeb-7fd1-4c88-8607-4d8fd47885ee",
+		"name": "Server Side Programming",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26233257"
+	},
+	"item": [
+		{
+			"name": "GetWeather",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://inh-8931-ssp-d-azwe-fa-1.azurewebsites.net/api/GetWeatherHttpTrigger?code=<auth_code>&jobName=<your_name>",
+					"protocol": "https",
+					"host": [
+						"inh-8931-ssp-d-azwe-fa-1",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"GetWeatherHttpTrigger"
+					],
+					"query": [
+						{
+							"key": "code",
+							"value": "<auth_code>",
+							"description": "This key is used to authenticate with the Http trigger on function level, without this key, your request will be denied and you receive Http status code 401."
+						},
+						{
+							"key": "jobName",
+							"value": "<your_name>",
+							"description": "This name is used as part of the identifier of the requested job. This has to be provided, else the request is denied and you receive Http status code 400."
+						}
+					]
+				},
+				"description": "This endpoint is the starting point for fetching images containing weather data from a multitude of weather stations across the Netherlands. Call this endpoint to start a job and receive a job ID. This can be used to get status info on the job or access and download the images."
+			},
+			"response": []
+		},
+		{
+			"name": "FetchImages",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://inh-8931-ssp-d-azwe-fa-1.azurewebsites.net/api/FetchWeatherHttpTrigger?jobId=<jobId>",
+					"protocol": "https",
+					"host": [
+						"inh-8931-ssp-d-azwe-fa-1",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"FetchWeatherHttpTrigger"
+					],
+					"query": [
+						{
+							"key": "jobId",
+							"value": "<jobId>"
+						}
+					]
+				},
+				"description": "This endpoint is for fetching images containing weather data from a multitude of weather stations across the Netherlands. Calling this endpoint can result in on of the following three results:\n\n1. Inform you that your job is still waiting to be processed.\n    \n2. Inform you that your job is still processing.\n    \n3. List urls to all images which can be downloaded and vieuwed in the browser."
+			},
+			"response": []
+		}
+	]
+}
