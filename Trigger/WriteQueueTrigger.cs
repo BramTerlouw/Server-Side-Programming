@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServerSideProgramming.Model;
 using ServerSideProgramming.Service.Interface;
+using System.Diagnostics.Metrics;
 
 namespace ServerSideProgramming.Trigger
 {
@@ -14,17 +15,20 @@ namespace ServerSideProgramming.Trigger
         private readonly IDownloadImageService _downloadImageService;
         private readonly IDrawService _drawService;
         private readonly IBlobService _blobService;
+        private readonly ITableService _tableService;
 
         public WriteQueueTrigger(
             ILogger<WriteQueueTrigger> logger,
             IDownloadImageService downloadImageService,
             IDrawService drawService,
-            IBlobService blobService)
+            IBlobService blobService,
+            ITableService tableService)
         {
             _logger                 = logger;
             _downloadImageService   = downloadImageService;
             _drawService            = drawService;
             _blobService            = blobService;
+            _tableService = tableService;
         }
 
 
@@ -57,6 +61,12 @@ namespace ServerSideProgramming.Trigger
 
             await _blobService.InitBlobAsync(data.JobId);
             await _blobService.CreateBlob($"{data.JobId}_{data.Measurement.stationname.Replace(" ", "_")}", writtenImage);
+
+            if (data.FinalJob)
+            {
+                _tableService.InitTable("jobstatus");
+                await _tableService.UpdateRecordInTable(data.JobId.Split('-')[0], data.JobId.Split('-')[1]);
+            }
         }
     }
 }

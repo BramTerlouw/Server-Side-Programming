@@ -9,20 +9,20 @@ namespace ServerSideProgramming.Model
 {
     public class JobStatus : TableEntity
     {
-        public string JobId { get; set; }
-        public string JobName { get; set; }
+        public string Requested_At { get; set; }
+        public string Name { get; set; }
         public bool IsCompleted { get; set; }
 
         public JobStatus() { }
 
-        public JobStatus(string jobId, string jobName, bool isCompleted)
+        public JobStatus(string requested_At, string name, bool isCompleted)
         {
-            JobId = jobId;
-            JobName = jobName;
+            Requested_At = requested_At;
+            Name = name;
             IsCompleted = isCompleted;
 
-            PartitionKey = jobId;
-            RowKey = jobId + jobName;
+            PartitionKey = requested_At;
+            RowKey = requested_At + name;
         }
     }
 }

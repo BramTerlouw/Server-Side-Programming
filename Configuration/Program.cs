@@ -15,9 +15,10 @@ var host = new HostBuilder()
       {
           services.AddTransient<IWeatherService, WeatherService>();
           services.AddTransient<IDrawService, DrawService>();
-          services.AddTransient<IBlobService, BlobService>();
           services.AddTransient<IDownloadImageService, DownloadImageService>();
           services.AddTransient<IQueueService, QueueService>();
+          services.AddTransient<IBlobService, BlobService>();
+          services.AddTransient<ITableService, TableService>();
       })
             .Build();
 

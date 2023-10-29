@@ -30,23 +30,5 @@ namespace ServerSideProgramming.Service.Storage
         {
             await _queueClient.SendMessageAsync(message);
         }
-
-        public async Task<bool> MessagesStillInQueue(string jobId)
-        {
-            QueueMessage[] receivedMessages = await _queueClient.ReceiveMessagesAsync();
-
-            if (receivedMessages.Length != 0)
-            {
-                foreach (QueueMessage item in receivedMessages)
-                {
-                    Job job = JsonConvert.DeserializeObject<Job>(item.Body.ToString());
-                    if (string.Equals(job.JobId, jobId))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }

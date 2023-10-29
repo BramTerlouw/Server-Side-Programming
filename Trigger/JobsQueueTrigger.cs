@@ -42,24 +42,19 @@ namespace ServerSideProgramming.Trigger
             _logger.LogInformation($"C# Queue trigger function processed Job with ID: {message.MessageText}");
             _queueService.InitQueue("writes");
 
-
             string jobId = message.Body.ToString();
             StationMeasurement[] measurements = await _weatherService.GetWeather();
 
-
             for (int i = 0; i < measurements.Length; i++)
             {
-                Job data = new Job(jobId, measurements[i]);
+                bool isLastItem = i == measurements.Length - 1;
+                Job data = new Job(jobId, measurements[i], isLastItem);
+
                 await _queueService.SendMessageAsync(
                     Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(
                             JsonConvert.SerializeObject(data))));
             }
-            //Job data = new Job(jobId, measurements[0]);
-            //await _queueService.SendMessageAsync(
-            //    Convert.ToBase64String(
-            //        Encoding.UTF8.GetBytes(
-            //            JsonConvert.SerializeObject(data))));
         }
     }
 }

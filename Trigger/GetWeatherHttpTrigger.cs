@@ -3,7 +3,6 @@ using System.Text;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
@@ -12,11 +11,16 @@ namespace ServerSideProgramming.Trigger
     {
         private readonly ILogger _logger;
         private readonly IQueueService _queueService;
+        private readonly ITableService _tableService;
 
-        public GetWeatherHttpTrigger(ILoggerFactory loggerFactory, IQueueService queueService)
+        public GetWeatherHttpTrigger(
+            ILoggerFactory loggerFactory, 
+            IQueueService queueService, 
+            ITableService tableService)
         {
             _logger = loggerFactory.CreateLogger<GetWeatherHttpTrigger>();
             _queueService = queueService;
+            _tableService = tableService;
         }
 
 
@@ -33,10 +37,11 @@ namespace ServerSideProgramming.Trigger
         /// Returns CustomOutputType obj as response, containing the job ID and HTTP response.
         /// </returns>
         [Function("GetWeatherHttpTrigger")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+        public async Task<HttpResponseData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             _queueService.InitQueue("jobs");
+            _tableService.InitTable("jobstatus");
 
             string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
@@ -49,9 +54,16 @@ namespace ServerSideProgramming.Trigger
             }
 
             string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}";
-            _queueService.SendMessageAsync(
+            await _queueService.SendMessageAsync(
                 Convert.ToBase64String(
                     Encoding.UTF8.GetBytes(jobId)));
+
+            await _tableService.CreateAsync(
+                new Model.JobStatus(
+                    jobId.Split('-')[0], 
+                    jobId.Split('-')[1], 
+                    false)
+                );
             
             return CreateResponse(
                 req,

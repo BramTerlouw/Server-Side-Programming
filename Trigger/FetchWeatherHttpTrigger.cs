@@ -4,6 +4,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using ServerSideProgramming.Model;
 using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
@@ -11,17 +12,17 @@ namespace ServerSideProgramming.Trigger
     public class FetchWeatherHttpTrigger
     {
         private readonly ILogger _logger;
-        private readonly IQueueService _queueService;
+        private readonly ITableService _tableService;
         private readonly IBlobService _blobService;
 
         public FetchWeatherHttpTrigger(
             ILoggerFactory loggerFactory, 
             IBlobService blobService,
-            IQueueService queueService)
+            ITableService tableService)
         {
             _logger         = loggerFactory.CreateLogger<FetchWeatherHttpTrigger>();
-            _queueService   = queueService;
             _blobService    = blobService;
+            _tableService   = tableService;
         }
 
 
@@ -43,7 +44,7 @@ namespace ServerSideProgramming.Trigger
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-
+            _tableService.InitTable("jobstatus");
 
             if (req.Query == null || req.Query["jobId"] == null)
             {
@@ -52,13 +53,12 @@ namespace ServerSideProgramming.Trigger
             }
             string jobId = req.Query["jobId"]?.ToString();
 
-            _queueService.InitQueue("writes");
-            if (await _queueService.MessagesStillInQueue(jobId))
+            JobStatus jobStatus = await _tableService.RetrieveRecord(jobId.Split('-')[0], jobId.Replace("-", ""));
+            if (!jobStatus.IsCompleted)
             {
                 HttpResponseData infoResponse = CreateResponse(req, "Images are still being processed!", HttpStatusCode.OK);
                 return infoResponse;
             }
-            
 
             await _blobService.InitBlobAsync(jobId);
             List<string> urls = await _blobService.GetBlobs();

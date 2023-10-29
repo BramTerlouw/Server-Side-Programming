@@ -14,9 +14,6 @@ $parameters = $parameters.Keys.ForEach({"$_=$($parameters[$_])"}) -join ' '
 
 Write-Host "Deploying resources in $resource_group_name"
 
-# Create a new resource-group
-#az group create -l westeurope -n $resource_group_name
-
 # Deploy resources inside resource-group
 $cmd = "az deployment group create --mode Incremental --resource-group $resource_group_name --template-file $template --parameters $parameters"
 Write-Host $cmd
