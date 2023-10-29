@@ -17,7 +17,7 @@ namespace JobQueueTrigger.Service
             image.Settings.FontPointsize    = 12;
 
             DrawableText stationName    = new DrawableText(50, 100, $"Station: {measurement.stationname}");
-            DrawableText temperature    = new DrawableText(50, 130, $"Regio: {measurement.temperature}");
+            DrawableText temperature    = new DrawableText(50, 130, $"Temperature: {measurement.temperature}");
             DrawableText windDir        = new DrawableText(50, 160, $"WindDirection: {measurement.winddirection}");
             DrawableText windSpeed      = new DrawableText(50, 190, $"Windspeed: {measurement.windspeed}");
 
