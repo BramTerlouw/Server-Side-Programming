@@ -9,7 +9,7 @@
 - De tweede en derde 'Could' zijn gedaan (_authorization op function level & proces status in table storage_).
 
 ## Desciption of codebase:
-Project gebouwd in DOTNET 6 ISOLATED, bevat vier azure functions waarvan twee queue triggers en twee Http triggers. Ook wordt gebruik gemaakt van BlobStorage voor het opslaan en ophalen van images.
+Project gebouwd in DOTNET 6 ISOLATED, bevat vier azure functions waarvan twee queue triggers en twee Http triggers. Ook wordt gebruik gemaakt van BlobStorage voor het opslaan en ophalen van images en TableStorage voor het bijhouden van de status van de jobs.
 
 ## Flow:
 - Gebruiker doet request naar Http trigger 'GetWeatherHttpTrigger'. Deze trigger, start een job die in de 'jobs queue' wordt gezet. Op deze manier blijft dit endpoint beschikbaar en kunnen meerdere verzoeken gedaan worden. Gebuiker krijgt een jobID dat kan worden gebruikt in de tweede http trigger.
