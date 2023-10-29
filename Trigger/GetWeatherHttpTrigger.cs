@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -49,16 +50,25 @@ namespace ServerSideProgramming.Trigger
             string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
 
-            if (req.Query == null || req.Query["jobName"] == null)
+            if (req.Query == null || string.IsNullOrEmpty(req.Query["jobName"]))
             {
                 return CreateResponse(
                     req,
                     "No or incorrect query parameter 'jobName' provided!", 
                     HttpStatusCode.BadRequest);
             }
-            string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}".ToLower();
+            string jobName = $"{req.Query["jobName"]}";
+
+            if (!Regex.IsMatch(jobName, "^[a-z0-9-]+$"))
+            {
+                return CreateResponse(
+                    req,
+                    "Job name not allowed, job name can only contain lowercase letters, numbers and hyphens!",
+                    HttpStatusCode.BadRequest);
+            }
 
 
+            string jobId = $"{timestamp}-{jobName}".ToLower();
             await _queueService.SendMessageAsync(
                 Convert.ToBase64String(
                     Encoding.UTF8.GetBytes(jobId)));

@@ -48,7 +48,7 @@ namespace ServerSideProgramming.Trigger
             _tableService.InitTable("jobstatus");
 
 
-            if (req.Query == null || req.Query["jobId"] == null)
+            if (req.Query == null || string.IsNullOrEmpty(req.Query["jobId"]))
             {
                 HttpResponseData errorResponse = CreateResponse(req, "No or incorrect query parameter 'jobId' provided!", HttpStatusCode.BadRequest);
                 return errorResponse;
