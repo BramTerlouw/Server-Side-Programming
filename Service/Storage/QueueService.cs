@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using ServerSideProgramming.Model;
 using ServerSideProgramming.Service.Interface;
 
-namespace ServerSideProgramming.Service
+namespace ServerSideProgramming.Service.Storage
 {
     public class QueueService : IQueueService
     {

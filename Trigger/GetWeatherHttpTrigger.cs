@@ -1,17 +1,22 @@
 using System.Net;
+using System.Text;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using ServerSideProgramming.Service.Interface;
 
 namespace ServerSideProgramming.Trigger
 {
     public class GetWeatherHttpTrigger
     {
         private readonly ILogger _logger;
+        private readonly IQueueService _queueService;
 
-        public GetWeatherHttpTrigger(ILoggerFactory loggerFactory)
+        public GetWeatherHttpTrigger(ILoggerFactory loggerFactory, IQueueService queueService)
         {
             _logger = loggerFactory.CreateLogger<GetWeatherHttpTrigger>();
+            _queueService = queueService;
         }
 
 
@@ -21,37 +26,45 @@ namespace ServerSideProgramming.Trigger
         /// </summary>
         /// 
         /// <param name="req">
-        /// Req is a HTTP GET request.
+        /// Req is a HTTP GET request. It should contain 'jobName' query param in url.
         /// </param>
         /// 
         /// <returns>
         /// Returns CustomOutputType obj as response, containing the job ID and HTTP response.
         /// </returns>
         [Function("GetWeatherHttpTrigger")]
-        public CustomOutputType Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-            string jobId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+            _queueService.InitQueue("jobs");
 
+            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            response.WriteString($"Here is your personal Job ID (To be used for fetching the images) :{jobId}");
-            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
-
-            string id = $"{jobId}";
-            return new CustomOutputType
+            if (req.Query == null || req.Query["jobName"] == null)
             {
-                JobId = id,
-                HttpResponse = response
-            };
+                return CreateResponse(
+                    req,
+                    "No or incorrect query parameter 'jobName' provided!", 
+                    HttpStatusCode.BadRequest);
+            }
+
+            string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}";
+            _queueService.SendMessageAsync(
+                Convert.ToBase64String(
+                    Encoding.UTF8.GetBytes(jobId)));
+            
+            return CreateResponse(
+                req,
+                $"Here is your personal Job ID (To be used for fetching the images) :{jobId}",
+                HttpStatusCode.OK);
         }
 
-        public class CustomOutputType
+        private HttpResponseData CreateResponse(HttpRequestData req, string message, HttpStatusCode code)
         {
-            [QueueOutput("jobs")]
-            public string? JobId { get; set; }
-            public HttpResponseData? HttpResponse { get; set; }
+            var response = req.CreateResponse(code);
+            response.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            response.WriteString(message);
+            return response;
         }
     }
 }

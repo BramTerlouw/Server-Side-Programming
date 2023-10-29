@@ -5,7 +5,7 @@ using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using JobQueueTrigger.Service.Interface;
 
-namespace JobQueueTrigger.Service
+namespace ServerSideProgramming.Service.Storage
 {
     public class BlobService : IBlobService
     {
@@ -20,8 +20,8 @@ namespace JobQueueTrigger.Service
             //string accountKey = "...";
             //StorageSharedKeyCredential storageSharedKeyCredential = new(accountName, accountKey);
             //_blobServiceClient = new BlobServiceClient(new Uri("..."), storageSharedKeyCredential);
-            
-            _blobServiceClient  = new BlobServiceClient(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
+
+            _blobServiceClient = new BlobServiceClient(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
         }
 
         public async Task InitBlobAsync(string jobId)
@@ -45,7 +45,7 @@ namespace JobQueueTrigger.Service
         {
             //UserDelegationKey sasToken = await RequestUserDelegationKey();
             List<string> urls = new List<string>();
-            
+
             await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
             {
                 // SAS TOKEN STILL IN PROGRESS
