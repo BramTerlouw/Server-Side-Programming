@@ -4,6 +4,10 @@
 **Studentnumber:**  614992          <br/>
 **Teacher:**        Raav Schravesande
 
+## DISCLAIMER @Raav
+- Alle 'Musts' zijn gedaan conform de opdracht.
+- De tweede en derde 'Could' zijn gedaan (_authorization op function level & proces status in table storage_).
+
 ## Desciption of codebase:
 Project gebouwd in DOTNET 6 ISOLATED, bevat vier azure functions waarvan twee queue triggers en twee Http triggers. Ook wordt gebruik gemaakt van BlobStorage voor het opslaan en ophalen van images.
 
@@ -16,5 +20,5 @@ Project gebouwd in DOTNET 6 ISOLATED, bevat vier azure functions waarvan twee qu
 ## Deployment:
 Function applicatie is gedeployed op Azure. Hiervoor is gebruik gemaakt van 'login.ps1', 'deploy.ps1', 'function.bicep' om te deployen.
 - login.ps1 -> Log in op azure naar de juiste subscription.
-- deploy.ps1 -> Maak resource group om resources naar te deployen.
+- deployment.ps1 -> Maak resource group om resources naar te deployen.
 - function.bicep -> ARM template waarin resources gedefinieerd worden. Wordt gebruikt door deploy.ps1.
