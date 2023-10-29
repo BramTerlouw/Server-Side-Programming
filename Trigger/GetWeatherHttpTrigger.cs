@@ -56,7 +56,7 @@ namespace ServerSideProgramming.Trigger
                     "No or incorrect query parameter 'jobName' provided!", 
                     HttpStatusCode.BadRequest);
             }
-            string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}";
+            string jobId = $"{timestamp}-{req.Query["jobName"]?.ToString()}".ToLower();
 
 
             await _queueService.SendMessageAsync(
