@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 using JobQueueTrigger.Service.Interface;
 
 namespace ServerSideProgramming.Service.Storage
@@ -19,7 +20,7 @@ namespace ServerSideProgramming.Service.Storage
         {
             _containerClient = _blobServiceClient.GetBlobContainerClient(jobId);
             await _containerClient.CreateIfNotExistsAsync();
-            _containerClient.SetAccessPolicy(PublicAccessType.Blob);
+            _containerClient.SetAccessPolicy(PublicAccessType.None);
         }
 
         public async Task CreateBlob(string blobName, byte[] blob)
@@ -35,22 +36,35 @@ namespace ServerSideProgramming.Service.Storage
         public async Task<List<string>> GetBlobs()
         {
             List<string> urls = new List<string>();
+            string sasToken = getBlobContainerSasToken();
 
             await foreach (BlobItem blobItem in _containerClient.GetBlobsAsync())
             {
-                urls.Add(_containerClient.GetBlobClient(blobItem.Name).Uri.ToString());
+                string fileUri = _containerClient.GetBlobClient(blobItem.Name).Uri.ToString();
+                urls.Add(combineUriWithSASToken(fileUri, sasToken));
             }
             return urls;
         }
 
-        public async Task<UserDelegationKey> RequestUserDelegationKey()
+        private string combineUriWithSASToken(string fileUri,  string sasToken)
         {
-            UserDelegationKey userDelegationKey =
-                await _blobServiceClient.GetUserDelegationKeyAsync(
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow.AddDays(1));
+            return $"{fileUri}?{sasToken}";
+        }
 
-            return userDelegationKey;
+        private string getBlobContainerSasToken()
+        {
+            Uri uri = getBlobContainerSasUri();
+            return uri.ToString().Split('?')[1];
+        }
+
+        private Uri getBlobContainerSasUri()
+        {
+            BlobSasBuilder builder = new BlobSasBuilder();
+            builder.BlobContainerName = _containerClient.Name;
+            builder.SetPermissions(BlobAccountSasPermissions.Read | BlobAccountSasPermissions.List);
+            builder.StartsOn = DateTimeOffset.Now.AddDays(-1);
+            builder.ExpiresOn = DateTimeOffset.Now.AddDays(1);
+            return _containerClient.GenerateSasUri(builder);
         }
     }
 }
